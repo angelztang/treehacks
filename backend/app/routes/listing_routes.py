@@ -216,15 +216,29 @@ def get_categories():
 @bp.route('/user', methods=['GET'])
 def get_user_listings():
     try:
-        # Get the user_id from the query parameters
+        # Prefer numeric user_id, but allow netid as a fallback for compatibility.
         user_id = request.args.get('user_id')
+        netid = request.args.get('netid')
 
-        if not user_id:
-            return jsonify({'error': 'user_id is required'}), 400
+        if not user_id and not netid:
+            return jsonify({'error': 'user_id is required (or provide netid to look up)'}), 400
+
+        # Resolve netid to user_id if needed
+        if not user_id and netid:
+            user = User.query.filter_by(netid=netid).first()
+            if not user:
+                return jsonify({'error': 'No user found for provided netid'}), 400
+            user_id = user.id
+
+        # Ensure user_id is integer
+        try:
+            uid = int(user_id)
+        except (TypeError, ValueError):
+            return jsonify({'error': 'Invalid user_id format'}), 400
 
         # Get all listings for this user by filtering on listing.user_id
         listings = (Listing.query
-                   .filter(Listing.user_id == int(user_id))
+                   .filter(Listing.user_id == uid)
                    .order_by(Listing.created_at.desc())
                    .all())
         
@@ -247,13 +261,27 @@ def get_user_listings():
 @bp.route('/buyer', methods=['GET'])
 def get_buyer_listings():
     try:
-        # Get the buyer_id from the request parameters
+        # Prefer numeric buyer_id, but allow netid as a fallback for compatibility.
         buyer_id = request.args.get('buyer_id')
-        if not buyer_id:
-            return jsonify({'error': 'No buyer_id provided'}), 400
+        netid = request.args.get('netid')
+
+        if not buyer_id and not netid:
+            return jsonify({'error': 'buyer_id is required (or provide netid to look up)'}), 400
+
+        # Resolve netid to buyer_id if needed
+        if not buyer_id and netid:
+            user = User.query.filter_by(netid=netid).first()
+            if not user:
+                return jsonify({'error': 'No user found for provided netid'}), 400
+            buyer_id = user.id
+
+        try:
+            bid = int(buyer_id)
+        except (TypeError, ValueError):
+            return jsonify({'error': 'Invalid buyer_id format'}), 400
 
         # Query for listings where the given id is the buyer
-        listings = Listing.query.filter_by(buyer_id=int(buyer_id)).order_by(Listing.created_at.desc()).all()
+        listings = Listing.query.filter_by(buyer_id=bid).order_by(Listing.created_at.desc()).all()
         
         # Convert to dictionary format
         return jsonify([{

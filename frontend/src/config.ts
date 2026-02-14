@@ -1,4 +1,10 @@
-// Always use Heroku URLs to avoid local development issues
-export const API_URL = 'https://tigerpop-marketplace-backend-76fa6fb8c8a2.herokuapp.com';
+// Use environment variable for API URL when available (useful for local dev).
+// In production builds you can set REACT_APP_API_URL to your production backend.
+export const API_URL = (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL !== '')
+	? process.env.REACT_APP_API_URL
+	: 'http://localhost:8000';
+
 export const CAS_URL = 'https://fed.princeton.edu/cas';
-export const FRONTEND_URL = 'https://tigerpop-marketplace-frontend-df8f1fbc1309.herokuapp.com'; 
+export const FRONTEND_URL = (process.env.REACT_APP_FRONTEND_URL && process.env.REACT_APP_FRONTEND_URL !== '')
+	? process.env.REACT_APP_FRONTEND_URL
+	: 'http://localhost:3000';

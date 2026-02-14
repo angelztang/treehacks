@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { API_URL } from '../config';
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://tigerpop-marketplace-backend-76fa6fb8c8a2.herokuapp.com/api',
+  baseURL: `${API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },

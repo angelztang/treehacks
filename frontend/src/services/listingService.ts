@@ -1,8 +1,7 @@
 // Handles fetching, creating, and updating listings (API calls)
 
 import { getUserId } from './authService';
-
-const API_URL = 'https://tigerpop-marketplace-backend-76fa6fb8c8a2.herokuapp.com';
+import { API_URL } from '../config';
 
 // Helper function to handle API responses
 const handleResponse = async (response: Response) => {
@@ -169,12 +168,25 @@ export const getCategories = async (): Promise<string[]> => {
 };
 
 export const getUserListings = async (userId: string): Promise<Listing[]> => {
-  const response = await fetch(`${API_URL}/api/listing/user/?user_id=${userId}`, {
-    headers: getHeaders(),
-    credentials: 'include',
-    mode: 'cors'
-  });
-  return handleResponse(response);
+  try {
+    // Note: avoid a trailing slash (/user/) because the backend route is defined as '/user'
+    const response = await fetch(`${API_URL}/api/listing/user?user_id=${userId}`, {
+      headers: getHeaders(),
+      credentials: 'include',
+      mode: 'cors'
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      console.error('Error fetching user listings:', errData);
+      throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+    }
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error('getUserListings error:', error);
+    throw error;
+  }
 };
 
 export const requestToBuy = async (listingId: number): Promise<any> => {
@@ -210,21 +222,28 @@ export const getUserPurchases = async (): Promise<Listing[]> => {
   return handleResponse(response);
 };
 
-export const getBuyerListings = async (netid: string): Promise<Listing[]> => {
+export const getBuyerListings = async (maybeUserId?: string): Promise<Listing[]> => {
   try {
-    console.log('Fetching buyer listings for buyer_id:', netid);
-    const response = await fetch(`${API_URL}/api/listing/buyer?buyer_id=${netid}`, {
+    const userId = maybeUserId || getUserId();
+    if (!userId) {
+      throw new Error('User id is required to fetch buyer listings');
+    }
+
+    const query = `?buyer_id=${encodeURIComponent(userId)}`;
+    console.log('Fetching buyer listings with params:', query);
+
+    const response = await fetch(`${API_URL}/api/listing/buyer${query}`, {
       headers: getHeaders(),
       credentials: 'include',
       mode: 'cors'
     });
-    
+
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
       console.error('Error fetching buyer listings:', errorData);
-      throw new Error(errorData.error || 'Failed to fetch buyer listings');
+      throw new Error(errorData.error || `Failed to fetch buyer listings (status ${response.status})`);
     }
-    
+
     const data = await response.json();
     console.log('Received buyer listings:', data);
     return data;

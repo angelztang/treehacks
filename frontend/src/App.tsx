@@ -5,6 +5,7 @@ import axios from 'axios';
 import Navbar from './components/Navbar';
 import MarketplacePage from './pages/MarketplacePage';
 import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 import Dashboard from './pages/Dashboard';
 import ListingDetail from './pages/ListingDetail';
 import './index.css';
@@ -66,6 +67,10 @@ const App: React.FC = () => {
           <Route 
             path="/login" 
             element={authenticated ? <Navigate to="/dashboard" /> : <LoginPage />} 
+          />
+          <Route
+            path="/signup"
+            element={authenticated ? <Navigate to="/dashboard" /> : <SignupPage />}
           />
           <Route 
             path="/dashboard" 

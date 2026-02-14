@@ -1,11 +1,10 @@
-import { FRONTEND_URL } from '../config';
-
-const API_URL = 'http://localhost:8000';
+import { FRONTEND_URL, API_URL } from '../config';
 
 export interface UserInfo {
-  id: number;
+  id?: number;
   username?: string;
   email?: string;
+  netid?: string;
 }
 
 export const login = async (username: string, password: string) => {
@@ -73,4 +72,23 @@ export const getUserInfo = (): UserInfo | null => {
   } catch {
     return null;
   }
+};
+
+// Sets or clears the user info stored in localStorage. Accepts a UserInfo object
+// or null to clear the stored user. This mirrors how other parts of the app
+// expect to update the cached user after CAS validation.
+export const setUserInfo = (user: UserInfo | null) => {
+  if (!user) {
+    localStorage.removeItem('user');
+  } else {
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+};
+
+// Helper to get the user's netid, if present.
+export const getNetid = (): string | null => {
+  const info = getUserInfo();
+  if (!info) return null;
+  // Prefer explicit netid, fall back to username if available
+  return info.netid || info.username || null;
 };
