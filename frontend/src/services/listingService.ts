@@ -73,7 +73,7 @@ export const getListings = async (filters?: string): Promise<Listing[]> => {
 };
 
 export const getListing = async (id: number): Promise<Listing> => {
-  const response = await fetch(`${API_URL}/api/listing/${id}/`, {
+  const response = await fetch(`${API_URL}/api/listing/${id}`, {
     headers: getHeaders(),
     credentials: 'include',
     mode: 'cors'
@@ -82,7 +82,7 @@ export const getListing = async (id: number): Promise<Listing> => {
 };
 
 export const createListing = async (data: CreateListingData): Promise<Listing> => {
-  const response = await fetch(`${API_URL}/api/listing/`, {
+  const response = await fetch(`${API_URL}/api/listing`, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify(data),
@@ -93,7 +93,7 @@ export const createListing = async (data: CreateListingData): Promise<Listing> =
 };
 
 export const updateListing = async (id: number, data: Partial<Listing>): Promise<Listing> => {
-  const response = await fetch(`${API_URL}/api/listing/${id}/`, {
+  const response = await fetch(`${API_URL}/api/listing/${id}`, {
     method: 'PUT',
     headers: getHeaders(),
     body: JSON.stringify(data),
@@ -104,7 +104,7 @@ export const updateListing = async (id: number, data: Partial<Listing>): Promise
 };
 
 export const updateListingStatus = async (id: number, status: 'available' | 'sold'): Promise<Listing> => {
-  const response = await fetch(`${API_URL}/api/listing/${id}/status/`, {
+  const response = await fetch(`${API_URL}/api/listing/${id}/status`, {
     method: 'PATCH',
     headers: getHeaders(),
     body: JSON.stringify({ status }),
@@ -119,7 +119,7 @@ export const deleteListing = async (id: number): Promise<void> => {
   if (!userId) {
     throw new Error('User not authenticated');
   }
-  const response = await fetch(`${API_URL}/api/listing/${id}/?user_id=${userId}`, {
+  const response = await fetch(`${API_URL}/api/listing/${id}?user_id=${userId}`, {
     method: 'DELETE',
     headers: getHeaders(),
     credentials: 'include',
@@ -138,7 +138,7 @@ export const uploadImages = async (files: File[]): Promise<string[]> => {
     const headers = getHeaders();
     delete headers['Content-Type']; // Let the browser set the correct content type for FormData
 
-    const response = await fetch(`${API_URL}/api/listing/upload/`, {
+  const response = await fetch(`${API_URL}/api/listing/upload`, {
       method: 'POST',
       headers,
       body: formData,
@@ -159,7 +159,7 @@ export const uploadImages = async (files: File[]): Promise<string[]> => {
 };
 
 export const getCategories = async (): Promise<string[]> => {
-  const response = await fetch(`${API_URL}/api/listing/categories/`, {
+  const response = await fetch(`${API_URL}/api/listing/categories`, {
     headers: getHeaders(),
     credentials: 'include',
     mode: 'cors'
@@ -195,7 +195,7 @@ export const requestToBuy = async (listingId: number): Promise<any> => {
     if (!userId) {
       throw new Error('User not authenticated');
     }
-    const response = await fetch(`${API_URL}/api/listing/${listingId}/buy/`, {
+  const response = await fetch(`${API_URL}/api/listing/${listingId}/buy`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({
@@ -214,7 +214,7 @@ export const requestToBuy = async (listingId: number): Promise<any> => {
 };
 
 export const getUserPurchases = async (): Promise<Listing[]> => {
-  const response = await fetch(`${API_URL}/api/listing/purchases/`, {
+  const response = await fetch(`${API_URL}/api/listing/purchases`, {
     headers: getHeaders(),
     credentials: 'include',
     mode: 'cors'
@@ -259,7 +259,7 @@ export const heartListing = async (id: number): Promise<void> => {
     if (!token) {
       throw new Error('Please log in to heart listings');
     }
-    const response = await fetch(`${API_URL}/api/listing/${id}/heart/`, {
+  const response = await fetch(`${API_URL}/api/listing/${id}/heart`, {
       method: 'POST',
       headers: getHeaders(),
       credentials: 'include',
@@ -280,7 +280,7 @@ export const unheartListing = async (id: number): Promise<void> => {
     if (!token) {
       throw new Error('Please log in to unheart listings');
     }
-    const response = await fetch(`${API_URL}/api/listing/${id}/heart/`, {
+  const response = await fetch(`${API_URL}/api/listing/${id}/heart`, {
       method: 'DELETE',
       headers: getHeaders(),
       credentials: 'include',
@@ -301,7 +301,7 @@ export const getHeartedListings = async (): Promise<Listing[]> => {
     if (!token) {
       return [];
     }
-    const response = await fetch(`${API_URL}/api/listing/hearted/`, {
+  const response = await fetch(`${API_URL}/api/listing/hearted`, {
       headers: getHeaders(),
       credentials: 'include',
       mode: 'cors'

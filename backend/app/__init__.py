@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from app.config import Config
 from app.extensions import db, migrate, init_extensions, jwt
@@ -54,6 +54,19 @@ def create_app(config_class=Config):
 
     # Configure JWT
     jwt.init_app(app)
+
+    # Add JWT error handlers to return clearer JSON errors instead of 422 HTML
+    @jwt.unauthorized_loader
+    def _unauthorized_callback(callback):
+        return jsonify({'error': 'Authorization required'}), 401
+
+    @jwt.invalid_token_loader
+    def _invalid_token_callback(reason):
+        return jsonify({'error': 'Invalid token', 'details': reason}), 401
+
+    @jwt.expired_token_loader
+    def _expired_token_callback(jwt_header, jwt_payload):
+        return jsonify({'error': 'Token expired'}), 401
 
     # Register blueprints
     from app.routes.auth_routes import bp as auth_bp

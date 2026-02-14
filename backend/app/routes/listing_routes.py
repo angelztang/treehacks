@@ -134,6 +134,7 @@ def get_listings():
         return jsonify({'error': 'Failed to fetch listings'}), 500
 
 @bp.route('', methods=['POST'])
+@bp.route('/', methods=['POST'])
 def create_listing():
     try:
         # Handle both JSON and form data

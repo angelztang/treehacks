@@ -58,7 +58,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ onSubmit, isSubmitting = fals
 
   // Initialize user_id when component mounts
   useEffect(() => {
-    const userId = localStorage.getItem('user_id');
+    const userId = getUserId();
     if (userId) {
       setFormData(prev => ({
         ...prev,
@@ -91,7 +91,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ onSubmit, isSubmitting = fals
     setError(null);
 
     try {
-      const userId = localStorage.getItem('user_id');
+      const userId = getUserId();
       if (!userId) {
         setError('User not authenticated. Please log in.');
         return;

@@ -35,8 +35,15 @@ const App: React.FC = () => {
           }
         })
           .then(response => {
-            const { netid } = response.data;
-            const newUserInfo: UserInfo = { netid };
+            // Backend returns { netid, user_id, access_token }
+            const { netid, user_id, access_token } = (response.data as any);
+
+            // Store token and full user info for app-wide usage
+            if (access_token) {
+              localStorage.setItem('token', access_token);
+            }
+
+            const newUserInfo: UserInfo = { id: user_id, netid };
             setUserInfo(newUserInfo);
             setUserInfoState(newUserInfo);
             setAuthenticated(true);
