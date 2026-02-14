@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Listing, getListing, heartListing, unheartListing } from '../services/listingService';
+import { Listing, getListing } from '../services/listingService';
 import { getNetid } from '../services/authService';
 import ListingDetailModal from '../components/ListingDetailModal';
 
@@ -10,7 +10,7 @@ const ListingDetail: React.FC = () => {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isHearted, setIsHearted] = useState(false);
+ 
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -32,20 +32,7 @@ const ListingDetail: React.FC = () => {
     fetchListing();
   }, [id]);
 
-  const handleHeartClick = async () => {
-    if (!listing) return;
-    
-    try {
-      if (isHearted) {
-        await unheartListing(listing.id);
-      } else {
-        await heartListing(listing.id);
-      }
-      setIsHearted(!isHearted);
-    } catch (err) {
-      console.error('Error toggling heart:', err);
-    }
-  };
+  // Heart functionality removed
 
   if (loading) {
     return <div className="text-center py-12">Loading...</div>;
@@ -60,8 +47,6 @@ const ListingDetail: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <ListingDetailModal
           listing={listing}
-          isHearted={isHearted}
-          onHeartClick={handleHeartClick}
           onClose={() => navigate(-1)}
         />
       </div>

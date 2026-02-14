@@ -32,7 +32,6 @@ export interface Listing {
   image: string;
   category: string;
   status: 'available' | 'pending' | 'sold';
-  isHearted?: boolean;
   user_id: number;
   user_netid: string;
   created_at: string;
@@ -252,72 +251,5 @@ export const getBuyerListings = async (maybeUserId?: string): Promise<Listing[]>
     throw error;
   }
 };
-
-export const heartListing = async (id: number): Promise<void> => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('Please log in to heart listings');
-    }
-  const response = await fetch(`${API_URL}/api/listing/${id}/heart`, {
-      method: 'POST',
-      headers: getHeaders(),
-      credentials: 'include',
-      mode: 'cors'
-    });
-    return handleResponse(response);
-  } catch (error: any) {
-    if (error.response?.status === 401) {
-      throw new Error('Please log in to heart listings');
-    }
-    throw new Error('Failed to heart listing');
-  }
-};
-
-export const unheartListing = async (id: number): Promise<void> => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('Please log in to unheart listings');
-    }
-  const response = await fetch(`${API_URL}/api/listing/${id}/heart`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-      credentials: 'include',
-      mode: 'cors'
-    });
-    return handleResponse(response);
-  } catch (error: any) {
-    if (error.response?.status === 401) {
-      throw new Error('Please log in to unheart listings');
-    }
-    throw new Error('Failed to unheart listing');
-  }
-};
-
-export const getHeartedListings = async (): Promise<Listing[]> => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return [];
-    }
-  const response = await fetch(`${API_URL}/api/listing/hearted`, {
-      headers: getHeaders(),
-      credentials: 'include',
-      mode: 'cors'
-    });
-    if (!response.ok) {
-      if (response.status === 401) return [];
-      if (response.status === 422) {
-        console.warn('Failed to fetch hearted listings (422)');
-        return [];
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return handleResponse(response);
-  } catch (error) {
-    console.error('Error fetching hearted listings:', error);
-    return [];
-  }
-};
-  
+// Hearting/listing favorites feature removed — frontend no longer uses these endpoints.
+// Hearting/listing favorites feature removed — frontend no longer uses these endpoints.

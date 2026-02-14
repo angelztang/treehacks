@@ -12,15 +12,22 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     # Setup CORS
+    # Build a dynamic origins list so we can inject the FRONTEND_URL used on Vercel
+    default_origins = [
+        "https://tigerpop-marketplace-frontend-df8f1fbc1309.herokuapp.com",
+        "http://localhost:3000",
+        "http://localhost:5000",
+        "http://localhost:5001",
+    ]
+
+    frontend_url = app.config.get('FRONTEND_URL')
+    if frontend_url and frontend_url not in default_origins:
+        default_origins.append(frontend_url)
+
     CORS(app, resources={
         r"/api/*": {
-            "origins": [
-                "https://tigerpop-marketplace-frontend-df8f1fbc1309.herokuapp.com",
-                "http://localhost:3000",
-                "http://localhost:5000",
-                "http://localhost:5001"
-            ],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "origins": default_origins,
+            "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
             "expose_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True,

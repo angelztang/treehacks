@@ -1,7 +1,7 @@
 // this should be buyer's purchase history, similar to SellerDashboard
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Listing, getBuyerListings, getHeartedListings, heartListing, unheartListing } from '../services/listingService';
+import { Listing, getBuyerListings } from '../services/listingService';
 import { getUserId } from '../services/authService';
 import ListingCard from '../components/ListingCard';
 import ListingDetailModal from '../components/ListingDetailModal';
@@ -11,7 +11,7 @@ type FilterTab = 'all' | 'pending' | 'purchased' | 'hearted';
 const BuyerDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
-  const [heartedListings, setHeartedListings] = useState<number[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
@@ -39,33 +39,13 @@ const BuyerDashboard: React.FC = () => {
     fetchListings();
   }, []);
 
-  const handleHeartClick = async (id: number) => {
-    try {
-      if (heartedListings.includes(id)) {
-        await unheartListing(id);
-        setHeartedListings(heartedListings.filter(listingId => listingId !== id));
-      } else {
-        await heartListing(id);
-        setHeartedListings([...heartedListings, id]);
-      }
-      // If we're on the hearted filter, refresh the listings
-      if (activeFilter === 'hearted') {
-        const userId = getUserId();
-        if (userId) {
-          const response = await getBuyerListings(userId);
-          setListings(response);
-        }
-      }
-    } catch (error) {
-      console.error('Error toggling heart:', error);
-    }
-  };
+  // Hearting removed
 
   const filteredListings = listings.filter(listing => {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'pending') return listing.status === 'pending';
     if (activeFilter === 'purchased') return listing.status === 'sold';
-    if (activeFilter === 'hearted') return heartedListings.includes(listing.id);
+  if (activeFilter === 'hearted') return false; // hearted filter disabled
     return false;
   });
 
@@ -106,14 +86,7 @@ const BuyerDashboard: React.FC = () => {
         >
           Purchased
         </button>
-        <button
-          onClick={() => setActiveFilter('hearted')}
-          className={`px-4 py-2 rounded ${
-            activeFilter === 'hearted' ? 'bg-orange-500 text-white' : 'bg-gray-200'
-          }`}
-        >
-          Hearted
-        </button>
+        {/* Hearted tab removed */}
       </div>
 
       {loading ? (
@@ -136,8 +109,6 @@ const BuyerDashboard: React.FC = () => {
             <ListingCard
               key={listing.id}
               listing={listing}
-              isHearted={heartedListings.includes(listing.id)}
-              onHeartClick={() => handleHeartClick(listing.id)}
             />
           ))}
         </div>
@@ -146,8 +117,6 @@ const BuyerDashboard: React.FC = () => {
       {selectedListing && (
         <ListingDetailModal
           listing={selectedListing}
-          isHearted={heartedListings.includes(selectedListing.id)}
-          onHeartClick={() => handleHeartClick(selectedListing.id)}
           onClose={() => setSelectedListing(null)}
           onUpdate={fetchListings}
         />

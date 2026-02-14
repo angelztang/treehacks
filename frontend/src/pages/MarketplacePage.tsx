@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import ListingCard from '../components/ListingCard';
-import { Listing, getListings, heartListing, unheartListing, getHeartedListings } from '../services/listingService';
+import { Listing, getListings } from '../services/listingService';
 import ListingDetailModal from '../components/ListingDetailModal';
 
 interface PriceRange {
@@ -23,7 +23,6 @@ const MarketplacePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [heartedListings, setHeartedListings] = useState<number[]>([]);
 
   const priceRanges: PriceRange[] = [
     { label: 'Under $10', max: 10 },
@@ -75,18 +74,8 @@ const MarketplacePage: React.FC = () => {
     }
   };
 
-  const fetchHeartedListings = async () => {
-    try {
-      const hearted = await getHeartedListings();
-      setHeartedListings(hearted.map(listing => listing.id));
-    } catch (error) {
-      console.error('Error fetching hearted listings:', error);
-    }
-  };
-
   useEffect(() => {
     fetchListings();
-    fetchHeartedListings();
   }, [selectedPrice, selectedCategory, searchQuery]);
 
   const location = useLocation();
@@ -115,33 +104,7 @@ const MarketplacePage: React.FC = () => {
     setSelectedPrice(selectedPrice === max ? null : max);
   };
 
-  const handleHeartClick = async (id: number) => {
-    try {
-      const isHearted = heartedListings.includes(id);
-      if (isHearted) {
-        await unheartListing(id);
-        setHeartedListings(prev => prev.filter(listingId => listingId !== id));
-      } else {
-        await heartListing(id);
-        setHeartedListings(prev => [...prev, id]);
-      }
-    } catch (error: any) {
-      console.error('Error toggling heart:', error);
-      if (error.response?.status === 401) {
-        alert('Please log in to heart listings');
-      } else if (error.response?.status === 400) {
-        if (error.response?.data?.error === 'Listing already hearted') {
-          alert('You have already hearted this listing');
-        } else if (error.response?.data?.error === 'Listing is not available') {
-          alert('This listing is no longer available');
-        } else {
-          alert('Failed to heart listing: ' + error.response?.data?.error);
-        }
-      } else {
-        alert('Failed to heart listing. Please try again.');
-      }
-    }
-  };
+  // Hearting removed — no-op
 
   const filteredListings = listings.filter(listing => {
     // Always filter out non-available listings
@@ -234,8 +197,6 @@ const MarketplacePage: React.FC = () => {
                   <ListingCard
                     key={listing.id}
                     listing={listing}
-                    isHearted={heartedListings.includes(listing.id)}
-                    onHeartClick={handleHeartClick}
                     onClick={() => setSelectedListing(listing)}
                   />
                 ))}
@@ -250,8 +211,6 @@ const MarketplacePage: React.FC = () => {
             listing={selectedListing}
             onClose={() => setSelectedListing(null)}
             onListingUpdated={handleListingUpdated}
-            isHearted={heartedListings.includes(selectedListing.id)}
-            onHeartClick={() => handleHeartClick(selectedListing.id)}
           />
         )}
       </div>

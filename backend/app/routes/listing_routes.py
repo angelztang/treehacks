@@ -318,33 +318,61 @@ def request_to_buy(id):
     listing.buyer_id = buyer_id
     listing.status = 'pending'
     db.session.commit()
-    
-    # Get seller's email
+
+    # Get seller's and buyer's user records
     seller = User.query.get(listing.user_id)
-    
-    # Send email to seller
-    msg = Message(
-        subject=f'TigerPop: New Interest in Your Listing - {listing.title}',
-        recipients=[f'{seller.netid}@princeton.edu'],
-        body=f'Someone is interested in your listing "{listing.title}"', 
-        html=f'''
+    buyer = User.query.get(buyer_id)
+
+    # Grab optional fields from the request (message, contact_info)
+    buyer_message = data.get('message') or ''
+    contact_info = data.get('contact_info') or ''
+
+    # Determine recipient email for seller (prefer explicit email, fallback to netid)
+    if seller and seller.email:
+        recipient = seller.email
+    elif seller and seller.netid:
+        recipient = f"{seller.netid}@princeton.edu"
+    else:
+        recipient = None
+
+    # Build email content including buyer contact details when available
+    buyer_contact = buyer.email if (buyer and buyer.email) else (f"{buyer.netid}@princeton.edu" if buyer and buyer.netid else contact_info or 'No contact provided')
+
+    if recipient:
+        msg = Message(
+            subject=f'TigerPop: New Interest in Your Listing - {listing.title}',
+            recipients=[recipient],
+            body=f"Someone is interested in your listing '{listing.title}'.\n\nMessage from buyer: {buyer_message}\nContact: {buyer_contact}",
+            html=f'''
             <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">
                 <h2 style="color: #4A90E2;">🎉 Someone is interested in your listing!</h2>
                 <p><strong>Title:</strong> {listing.title}</p>
                 <p><strong>Price:</strong> ${listing.price}</p>
                 <p><strong>Category:</strong> {listing.category}</p>
                 <hr style="margin: 20px 0;">
-                <p>You can <a href="http://localhost:3000/listings/{listing.id}" style="color: #4A90E2;">view and manage your listing here</a>.</p>
+                <p><strong>Message from buyer:</strong></p>
+                <p>{buyer_message or 'No message provided'}</p>
+                <p><strong>Buyer contact:</strong> {buyer_contact}</p>
+                <p style="margin-top: 16px;">You can <a href="{current_app.config.get('FRONTEND_URL','http://localhost:3000')}/listings/{listing.id}" style="color: #4A90E2;">view and manage your listing here</a>.</p>
                 <p>– The <strong>TigerPop</strong> Team 🐯</p>
             </div>
-        '''
-    )
-    
-    try:
-        mail.send(msg)
-    except Exception as e:
-        current_app.logger.error(f"Failed to send email: {str(e)}")
-    
+            '''
+        )
+
+        try:
+            mail.send(msg)
+        except Exception as e:
+            current_app.logger.error(f"Failed to send email: {str(e)}")
+            # don't fail the whole request if mail sending fails, but report it
+            return jsonify({
+                'message': 'Purchase request recorded, but failed to send email',
+                'error': str(e),
+                'listing': {'id': listing.id, 'status': listing.status}
+            }), 207
+
+    else:
+        current_app.logger.warning(f"Seller has no email address: seller={seller}")
+
     return jsonify({
         'message': 'Purchase request sent successfully',
         'listing': {

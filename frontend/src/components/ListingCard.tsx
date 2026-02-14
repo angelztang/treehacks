@@ -2,18 +2,15 @@
 import React from 'react';
 import { Listing } from '../services/listingService';
 import { useNavigate } from 'react-router-dom';
-import { HeartIcon } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
 interface ListingCardProps {
   listing: Listing;
   onDelete?: () => void;
   onClick?: () => void;
-  isHearted?: boolean;
-  onHeartClick?: (id: number) => void;
+  // removed hearting UI/props
 }
 
-const ListingCard: React.FC<ListingCardProps> = ({ listing, onDelete, onClick, isHearted = false, onHeartClick }) => {
+const ListingCard: React.FC<ListingCardProps> = ({ listing, onDelete, onClick }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -76,15 +73,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, onDelete, onClick, i
               Condition: <span className="capitalize">{listing.condition || 'Not specified'}</span>
             </p>
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onHeartClick?.(listing.id);
-            }}
-            className={`text-2xl ${isHearted ? 'text-red-500' : 'text-gray-400'}`}
-          >
-            ♥
-          </button>
+          {/* heart action removed */}
         </div>
       </div>
     </div>
